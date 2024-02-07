@@ -22,7 +22,7 @@ subroutine driver()
 #ifdef USE_ALLOCATABLE
     allocate(stack(arrlen, nblocks))
 #endif
-    stack = 0.0_rk
+    !stack = 0.0_rk
 
     !$acc data copyin(x) copyout(output) create(stack)
     !$acc parallel loop
@@ -43,14 +43,14 @@ subroutine kernel(arrlen, x, output, stack)
     integer(kind = ik), intent(in) :: arrlen
     real(kind = rk), intent(in) :: x(arrlen)
     real(kind = rk), intent(inout) :: output(arrlen)
-    real(kind = rk), contiguous, intent(inout) :: stack(:)
+    real(kind = rk), intent(inout) :: stack(:)
 
     real(kind = rk) :: tmpA(arrlen)
     integer(kind = ik) :: i
-    pointer(ptrA, tmpA)
+    pointer(ptrA, tmpA) ! Declare Cray pointer 'ptrA', with pointee 'tmpA'.
     !$acc routine vector
     !$acc data present(stack, x, output)
-
+    
     ! Setup Cray pointer. 
     ptrA = loc(stack(1_ik)) ! `tmpA` now points to beginning of stack.
 
@@ -63,6 +63,7 @@ subroutine kernel(arrlen, x, output, stack)
     do i = 1_ik, arrlen
         output(i) = tmpA(i)
     end do
+
     !$acc end data
 
 end subroutine kernel
