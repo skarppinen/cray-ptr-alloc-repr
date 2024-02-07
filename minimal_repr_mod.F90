@@ -22,7 +22,7 @@ subroutine driver()
 #ifdef USE_ALLOCATABLE
     allocate(stack(arrlen, nblocks))
 #endif
-    !stack = 0.0_rk
+    stack = 0.0_rk
 
     !$acc data copyin(x) copyout(output) create(stack)
     !$acc parallel loop
